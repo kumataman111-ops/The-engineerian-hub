@@ -1,0 +1,34 @@
+import { useState } from 'react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowUpRight, ArrowRight, MoveDown, Layers3, Menu, X, Search, Download, Check } from 'lucide-react'
+import products from '@/data/products'
+import { PartIllustration } from '../components/PartIllustration'
+
+export const Route = createFileRoute('/')({ component: Home })
+function Home() {
+  const [category, setCategory] = useState('All capabilities')
+  const [query, setQuery] = useState('')
+  const [menu, setMenu] = useState(false)
+  const filtered = products.filter(p => (category === 'All capabilities' || p.category === category) && `${p.name} ${p.description}`.toLowerCase().includes(query.toLowerCase()))
+  const download = () => {
+    const text = 'ENGINEERIAN HUB\nManufacturing capabilities catalog\n\n' + products.map(p => `${p.name}\n${p.description}\nIllustrative applications: ${p.examples.join(', ')}\n`).join('\n') + '\nAll components are made to customer requirements. Images and applications are illustrative; materials, dimensions, tolerances, and availability require project-specific review.'
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }))
+    const a = document.createElement('a'); a.href = url; a.download = 'Engineerian-Hub-Capabilities.txt'; a.click(); URL.revokeObjectURL(url)
+  }
+  return <>
+    <header className="header"><a className="brand" href="#"><span className="brand-symbol"><Layers3 size={25}/></span><span>ENGINEERIAN<span className="brand-hub">HUB</span></span></a><nav className={menu?'nav open':'nav'} aria-label="Main navigation"><a href="#catalog" onClick={()=>setMenu(false)}>Product catalog</a><a href="#capabilities" onClick={()=>setMenu(false)}>Capabilities</a><a href="#about" onClick={()=>setMenu(false)}>About us</a></nav><a className="header-cta" href="#catalog">Explore our work <ArrowUpRight size={17}/></a><button className="menu-toggle" onClick={()=>setMenu(!menu)} aria-label={menu?'Close menu':'Open menu'} aria-expanded={menu}>{menu?<X/>:<Menu/>}</button></header>
+    <main>
+      <section className="hero"><div className="hero-photo"/><div className="hero-shade"/><div className="hero-content"><p className="eyebrow"><span className="status-dot"/> ENGINEERED FOR INDUSTRY</p><h1>Precision in every part.<br/><span>Progress in every process.</span></h1><p className="hero-description">Automotive child parts and metal manufacturing.<br/>From the first cut to the final finish, built around your requirements.</p><a className="button lime" href="#catalog">Explore product catalog <ArrowUpRight size={19}/></a><div className="hero-note"><span className="small-line"/> YOUR DRAWING. OUR CRAFT.</div></div><div className="hero-bottom"><span>ENGINEERIAN HUB / MANUFACTURING ENTERPRISE</span><a href="#catalog">Discover what we make <MoveDown size={15}/></a></div></section>
+      <section className="process-strip" id="capabilities"><span className="strip-label">ONE HUB.<br/><strong>MULTIPLE CAPABILITIES.</strong></span>{['Automotive parts','Laser cutting','Surface grinding','Metal press work','VMC machining'].map((s,i)=><span key={s}><span className="strip-number">0{i+1}</span>{s}</span>)}</section>
+      <section className="catalog section" id="catalog"><div className="section-heading"><div><p className="eyebrow muted">THE MANUFACTURING CATALOG</p><h2>Parts that fit.<br/><span>Capabilities that deliver.</span></h2></div><div className="section-intro"><p>Explore our component families and manufacturing processes. Made to your drawings. Shaped for your application.</p><button className="text-button" onClick={download}>Download capabilities <Download size={16}/></button></div></div>
+        <div className="catalog-controls"><div className="filters" aria-label="Filter catalog">{['All capabilities',...products.map(p=>p.category)].map(c=><button key={c} className={c===category?'active':''} aria-pressed={c===category} onClick={()=>setCategory(c)}>{c}</button>)}</div><label className="search"><Search size={17}/><input aria-label="Search catalog" placeholder="Search catalog" value={query} onChange={e=>setQuery(e.target.value)}/></label></div>
+        <div className="catalog-count" aria-live="polite">{String(filtered.length).padStart(2,'0')} CAPABILITIES <span>DRAWING-BASED MANUFACTURING</span></div>
+        <div className="product-grid">{filtered.map(p=><Link className="product-card" key={p.id} to="/products/$productId" params={{productId:String(p.id)}}><div className="part-image"><span className="part-number">EH / 0{p.id}</span><PartIllustration kind={p.kind} id={p.id}/><span className="image-label">COMPONENT ILLUSTRATION</span><span className="card-arrow"><ArrowUpRight size={20}/></span></div><div className="product-copy"><p className="product-category">{p.process}</p><h3>{p.name}</h3><p>{p.shortDescription}</p><div className="card-bottom"><span>Explore capability</span><ArrowRight size={17}/></div></div></Link>)}</div>
+        {filtered.length===0&&<div className="empty"><h3>No matching capabilities</h3><p>Try another search or browse the full catalog.</p><button className="button dark" onClick={()=>{setQuery('');setCategory('All capabilities')}}>Reset filters <ArrowRight size={17}/></button></div>}
+        <p className="catalog-disclaimer">Component illustrations show representative forms. Final designs, materials, dimensions, and tolerances are defined by your project requirements.</p>
+      </section>
+      <section className="about section" id="about"><div><p className="eyebrow">BUILT AROUND YOUR REQUIREMENTS</p><h2>Your manufacturing needs.<br/><span>Our engineering mindset.</span></h2><p>Engineerian Hub manufactures child parts for automotive companies and provides laser cutting, surface grinding, metal press work, and VMC machine work. We connect these processes around the component you need to make.</p></div><div className="about-list">{[['01','From drawing to component','Part geometry and application guide the manufacturing approach.'],['02','The right process for the part','Cutting, forming, machining, and finishing capabilities in one catalog.'],['03','Specifications come first','Materials, dimensions, and finishing requirements are reviewed for each project.']].map(([n,t,d])=><div key={n}><span>{n}</span><div><h3>{t}</h3><p>{d}</p></div><Check size={19}/></div>)}</div></section>
+      <section className="closing"><div><p className="eyebrow">FROM CONCEPT TO COMPONENT</p><h2>Find the process.<br/>Build the possibility.</h2></div><a href="#catalog" className="button dark">Browse our capabilities <ArrowUpRight size={19}/></a></section>
+    </main><footer><a href="#" className="brand"><Layers3 size={23}/><span>ENGINEERIAN<span className="brand-hub">HUB</span></span></a><p>Parts. Processes. Possibilities.</p><span>© {new Date().getFullYear()} Engineerian Hub</span></footer>
+  </>
+}
